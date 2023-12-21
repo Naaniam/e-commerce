@@ -1,0 +1,30 @@
+# Use an official Golang runtime as a parent image
+FROM golang:latest
+
+# Set the working directory to /app
+WORKDIR /app
+
+# Copy the current directory contents into the container at /app3
+COPY . .
+COPY . /app
+COPY go.mod .
+COPY go.sum .
+COPY .env /app          
+
+# Download and install any dependencies specified in your go.mod and go.sum 
+RUN go mod download
+RUN go get github.com/go-playground/validator/v10
+
+# Build the Go app
+RUN go build -o main .
+
+# Expose port 8080 to the outside world
+EXPOSE 8081
+
+# Command to run the executable
+CMD ["./main",".env"]
+ENTRYPOINT ["./main",".env"]
+
+
+
+

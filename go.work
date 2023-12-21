@@ -1,0 +1,8 @@
+go 1.21.0
+
+use (
+	D:\Golang\Tasks\e-commerce\gateway
+	D:\Golang\Tasks\e-commerce\orderService
+	D:\Golang\Tasks\e-commerce\productService
+	D:\Golang\Tasks\e-commerce\userService
+)
