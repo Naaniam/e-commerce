@@ -23,8 +23,8 @@ func NewEchoServer(svc Service) *echo.Echo {
 	e.POST("/e-commerce/v1/admin/signup", echo.WrapHandler(adminSignUpHandler))
 	e.POST("/e-commerce/v1/admin/login", echo.WrapHandler(adminLoginHandler))
 
-	e.GET("/e-commerce/v1/admin/getmembers", echo.WrapHandler(getAllMembersHandler))
-	e.GET("/e-commerce/v1/admin/getmember/", echo.WrapHandler(getMemberByIDHandler))
+	e.GET("/e-commerce/v1/admin/get-members", echo.WrapHandler(getAllMembersHandler))
+	e.GET("/e-commerce/v1/admin/get-member/", echo.WrapHandler(getMemberByIDHandler))
 
 	//Member Routes to signup, login
 	e.POST("/e-commerce/v1/member/login", echo.WrapHandler(memberLoginHandler))

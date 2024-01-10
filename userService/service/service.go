@@ -79,7 +79,7 @@ func (svc *service) AdminSignUpService(ctx context.Context, admin *models.Admin)
 
 func (svc *service) AdminLoginService(ctx context.Context, email string, password string) (string, error) {
 	logger := log.With(svc.Logger, "method", "AdminLoginService", "time", time.Now().Local())
-
+	var token string
 	var admin models.Admin
 
 	if email == "" || password == "" {
@@ -101,7 +101,7 @@ func (svc *service) AdminLoginService(ctx context.Context, email string, passwor
 	}
 
 	//Generate Token
-	token, err := middleware.AdminToken(admin.Email, admin.ID)
+	token, err = middleware.AdminToken(admin.Email, admin.ID)
 	if err != nil {
 		level.Error(logger).Log("Error", err)
 		return "", err

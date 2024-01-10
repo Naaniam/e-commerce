@@ -14,11 +14,17 @@ COPY .env /app
 # Download and install any dependencies specified in your go.mod and go.sum 
 RUN go mod download
 RUN go get github.com/go-playground/validator/v10
+RUN go get github.com/joho/godotenv
+RUN go get gorm.io/gorm
+RUN go get gorm.io/driver/postgres
+RUN go get github.com/go-kit/kit/transport/http
+RUN go get github.com/labstack/echo
+RUN go get github.com/go-kit/kit/endpoint
 
 # Build the Go app
 RUN go build -o main .
 
-# Expose port 8080 to the outside world
+# Expose port 8082 to the outside world
 EXPOSE 8082
 
 # Command to run the executable

@@ -1,7 +1,6 @@
 package service
 
 import (
-	"fmt"
 	"os"
 
 	"github.com/e-commerce/gateway/middleware"
@@ -14,7 +13,7 @@ func NewEchoServer(svc Handler) *echo.Echo {
 
 	err := godotenv.Load(".env")
 	if err != nil {
-		fmt.Println("Error Loading.env", err)
+		return nil
 	}
 
 	e.POST("/v1/e-commerce/admin-signup", middleware.AdminAuthorize([]byte(os.Getenv("SECRET")), svc.MakeAdminSignUpGatewayHandler))

@@ -19,9 +19,16 @@ import (
 
 // AddOrder handler
 func (svc *Service) MakeAddOrderGatewayHandler(c echo.Context) error {
+	logger := log.With(svc.Logger, "method", "MakeAddOrderGatewayHandler", "time", time.Now().Local())
+
 	var request AddOrderRequest
 
-	logger := log.With(svc.Logger, "method", "MakeAddOrderGatewayHandler", "time", time.Now().Local())
+	clientID := c.FormValue("client_id")
+	clientSecret := c.FormValue("client_secret")
+
+	if clientID == "" || clientSecret == "" {
+		return c.JSON(http.StatusBadRequest, fmt.Errorf("ClientID orClientSecret is invalid").Error())
+	}
 
 	err := godotenv.Load(".env")
 	if err != nil {
@@ -46,7 +53,7 @@ func (svc *Service) MakeAddOrderGatewayHandler(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, "error: "+err.Error())
 	}
 
-	req, err := http.NewRequest("POST", os.Getenv("ADDORDER"), bytes.NewBuffer(requests))
+	req, err := http.NewRequest("POST", fmt.Sprintf(os.Getenv("ADDORDER"), clientID, clientSecret), bytes.NewBuffer(requests))
 	if err != nil {
 		level.Error(logger).Log("Error", err, "time", time.Now().Local())
 		return c.JSON(http.StatusInternalServerError, "error: "+err.Error())
@@ -86,7 +93,8 @@ func (svc *Service) MakeAddOrderGatewayHandler(c echo.Context) error {
 	data := response["order_response"]
 	content, ok := data.(map[string]interface{})
 	if !ok {
-		fmt.Println("NOT OK")
+		level.Error(logger).Log("Error", "NO response", "time", time.Now().Local())
+		return c.JSON(http.StatusInternalServerError, "error: No response")
 	}
 
 	session.Values["response"] = fmt.Sprintf("Member Mail:%s\nOrderID: %s\nBrand Name:%s\nBrand Price:%f\nRam Price:%f\nDVD Price:%f\nNet Price:%f", content["member_email"], content["OrderID"], content["brand_name"], content["brand_price"], content["ram_price"], content["dvd_price"], content["net_price"])
@@ -94,9 +102,6 @@ func (svc *Service) MakeAddOrderGatewayHandler(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-
-	fmt.Println("session.values ", session.Values["response"])
-
 	return c.Redirect(http.StatusSeeOther, "/send-mail")
 }
 
@@ -104,13 +109,20 @@ func (svc *Service) MakeAddOrderGatewayHandler(c echo.Context) error {
 func (svc *Service) MakeGetAllOrderResponseGatewayHandler(c echo.Context) error {
 	logger := log.With(svc.Logger, "method", "MakeGetAllOrderResponseGatewayHandler", "time", time.Now().Local())
 
+	clientID := c.FormValue("client_id")
+	clientSecret := c.FormValue("client_secret")
+
+	if clientID == "" || clientSecret == "" {
+		return c.JSON(http.StatusBadRequest, fmt.Errorf("ClientID orClientSecret is invalid").Error())
+	}
+
 	err := godotenv.Load(".env")
 	if err != nil {
 		level.Error(logger).Log("Error", err, "time", time.Now().Local())
 		return c.JSON(http.StatusBadRequest, "error: "+err.Error())
 	}
 
-	req, err := http.NewRequest("GET", os.Getenv("GETALLORDERDETAILS"), nil)
+	req, err := http.NewRequest("GET", fmt.Sprintf(os.Getenv("GETALLORDERDETAILS"), clientID, clientSecret), nil)
 	if err != nil {
 		level.Error(logger).Log("Error", err, "time", time.Now().Local())
 		return c.JSON(http.StatusInternalServerError, "error: "+err.Error())
@@ -143,9 +155,15 @@ func (svc *Service) MakeGetAllOrderResponseGatewayHandler(c echo.Context) error 
 
 // GETORDERDBYID HANDLER
 func (svc *Service) MakeGetOrderByIDHandler(c echo.Context) error {
-	request := c.FormValue("order_id")
-
 	logger := log.With(svc.Logger, "method", "MakeGetOrderByIDHandler", "time", time.Now().Local())
+
+	request := c.FormValue("order_id")
+	clientID := c.FormValue("client_id")
+	clientSecret := c.FormValue("client_secret")
+
+	if clientID == "" || clientSecret == "" {
+		return c.JSON(http.StatusBadRequest, fmt.Errorf("ClientID orClientSecret is invalid").Error())
+	}
 
 	err := godotenv.Load(".env")
 	if err != nil {
@@ -153,7 +171,7 @@ func (svc *Service) MakeGetOrderByIDHandler(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, "error: "+err.Error())
 	}
 
-	req, err := http.NewRequest("GET", fmt.Sprintf(os.Getenv("GETORDERDETAILSBYID"), request), nil)
+	req, err := http.NewRequest("GET", fmt.Sprintf(os.Getenv("GETORDERDETAILSBYID"), clientID, clientSecret, request), nil)
 	if err != nil {
 		level.Error(logger).Log("Error", err, "time", time.Now().Local())
 		return c.JSON(http.StatusInternalServerError, "error: "+err.Error())
@@ -165,6 +183,7 @@ func (svc *Service) MakeGetOrderByIDHandler(c echo.Context) error {
 		level.Error(logger).Log("Error", err, "time", time.Now().Local())
 		return c.JSON(http.StatusInternalServerError, "error: "+err.Error())
 	}
+
 	defer resp.Body.Close()
 
 	responseBody, err := io.ReadAll(resp.Body)
@@ -185,9 +204,18 @@ func (svc *Service) MakeGetOrderByIDHandler(c echo.Context) error {
 
 // DeleteOrderByID Handler
 func (svc *Service) MakeDeleteOrderByIDGatewayHandler(c echo.Context) error {
+	logger := log.With(svc.Logger, "method", "MakeDeleteOrderByIDGatewayHandler", "time", time.Now().Local())
+	fmt.Println("HOIIIIII")
+
+	clientID := c.FormValue("client_id")
+	clientSecret := c.FormValue("client_secret")
 	request := c.FormValue("order_id")
 
-	logger := log.With(svc.Logger, "method", "MakeDeleteOrderByIDGatewayHandler", "time", time.Now().Local())
+	fmt.Println("ClientID", clientID, clientSecret)
+
+	if clientID == "" || clientSecret == "" {
+		return c.JSON(http.StatusBadRequest, fmt.Errorf("ClientID orClientSecret is invalid").Error())
+	}
 
 	err := godotenv.Load(".env")
 	if err != nil {
@@ -195,7 +223,9 @@ func (svc *Service) MakeDeleteOrderByIDGatewayHandler(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, "error: "+err.Error())
 	}
 
-	req, err := http.NewRequest("DELETE", fmt.Sprintf(os.Getenv("DELETEPRODUCTBYID"), request), nil)
+	fmt.Println(fmt.Sprintf(os.Getenv("DELETEORDER"), clientID, clientSecret, request))
+
+	req, err := http.NewRequest("DELETE", fmt.Sprintf(os.Getenv("DELETEORDER"), clientID, clientSecret, request), nil)
 	if err != nil {
 		level.Error(logger).Log("Error", err, "time", time.Now().Local())
 		return c.JSON(http.StatusInternalServerError, "error: "+err.Error())
@@ -228,11 +258,16 @@ func (svc *Service) MakeDeleteOrderByIDGatewayHandler(c echo.Context) error {
 
 // UpdateOrderStatus
 func (svc *Service) MakeUpdateOrderStatusGatewayHandler(c echo.Context) error {
+	logger := log.With(svc.Logger, "method", "MakeAddOrderGatewayHandler", "time", time.Now().Local())
 	var request UpdateOrderStatusRequest
 
-	logger := log.With(svc.Logger, "method", "MakeAddOrderGatewayHandler", "time", time.Now().Local())
-
 	request.OrderID = c.FormValue("order_id")
+	clientID := c.FormValue("client_id")
+	clientSecret := c.FormValue("client_secret")
+
+	if clientID == "" || clientSecret == "" {
+		return c.JSON(http.StatusBadRequest, fmt.Errorf("ClientID orClientSecret is invalid").Error())
+	}
 
 	err := godotenv.Load(".env")
 	if err != nil {
@@ -253,7 +288,7 @@ func (svc *Service) MakeUpdateOrderStatusGatewayHandler(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, "error: "+err.Error())
 	}
 
-	req, err := http.NewRequest("PUT", os.Getenv("UPDATESTATUS"), bytes.NewBuffer(requests))
+	req, err := http.NewRequest("PUT", fmt.Sprintf(os.Getenv("UPDATESTATUS"), clientID, clientSecret), bytes.NewBuffer(requests))
 	if err != nil {
 		level.Error(logger).Log("Error", err, "time", time.Now().Local())
 		return c.JSON(http.StatusInternalServerError, "error: "+err.Error())

@@ -14,7 +14,7 @@ func NewEchoServer(svc Service) *echo.Echo {
 	updateBrandByIDHandler := kithttp.NewServer(MakeUpdateBrandByNameEndpoint(svc), UpdateBrandByNameDecodeRequest, EncodeResponse)
 	deleteBrandByIDHandler := kithttp.NewServer(MakeDeleteBrandByIDEndpoint(svc), DeleteBrandByIDDecodeRequest, EncodeResponse)
 
-	e.POST("/e-commerce/v1/admin/addbrand", echo.WrapHandler(addBrandsHandler))
+	e.POST("/e-commerce/v1/admin/add-brand", echo.WrapHandler(addBrandsHandler))
 	e.GET("/e-commerce/v1/view-all-brand", echo.WrapHandler(viewAllBrandsHandler))
 	e.GET("/e-commerce/v1/view-brand-by-name/", echo.WrapHandler(viewBrandByNameHandler))
 	e.PUT("/e-commerce/v1/update-brand-by-name/", echo.WrapHandler(updateBrandByIDHandler))

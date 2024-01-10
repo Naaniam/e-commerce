@@ -98,11 +98,9 @@ func (svc *Service) MakeMemberLoginGatewayHandler(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, "error: "+err.Error())
 	}
 
-	fmt.Println("Session in login", session)
 	session.Values["email"] = request.Email
 	session.Save(c.Request(), c.Response())
 
-	fmt.Println("session.values ", session.Values["email"])
 	req, err := http.NewRequest("POST", os.Getenv("MEMBERLOGIN"), bytes.NewBuffer(requests))
 	if err != nil {
 		level.Error(logger).Log("Error", err, "time", time.Now().Local())
@@ -140,6 +138,12 @@ func (svc *Service) MakeGetMemberByMailHandler(c echo.Context) error {
 	logger := log.With(svc.Logger, "method", "MakeGetMemberByMailHandler", "time", time.Now().Local())
 
 	request := c.FormValue("email")
+	clientID := c.FormValue("client_id")
+	clientSecret := c.FormValue("client_secret")
+
+	if clientID == "" || clientSecret == "" {
+		return c.JSON(http.StatusBadRequest, fmt.Errorf("ClientID orClientSecret is invalid").Error())
+	}
 
 	err := godotenv.Load(".env")
 	if err != nil {
@@ -147,7 +151,7 @@ func (svc *Service) MakeGetMemberByMailHandler(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, "error: "+err.Error())
 	}
 
-	req, err := http.NewRequest("GET", fmt.Sprintf(os.Getenv("GETMEMBERBYMAILID"), request), nil)
+	req, err := http.NewRequest("GET", fmt.Sprintf(os.Getenv("GETMEMBERBYMAILID"), clientID, clientSecret, request), nil)
 	if err != nil {
 		level.Error(logger).Log("Error", err, "time", time.Now().Local())
 		return c.JSON(http.StatusInternalServerError, "error: "+err.Error())
@@ -179,8 +183,14 @@ func (svc *Service) MakeGetMemberByMailHandler(c echo.Context) error {
 
 // GETALLMEMBERS HANDLER
 func (svc *Service) MakeGetAllMembersGatewayHandler(c echo.Context) error {
-
 	logger := log.With(svc.Logger, "method", "MakeGetAllMembersGatewayHandler", "time", time.Now().Local())
+
+	clientID := c.FormValue("client_id")
+	clientSecret := c.FormValue("client_secret")
+
+	if clientID == "" || clientSecret == "" {
+		return c.JSON(http.StatusBadRequest, fmt.Errorf("ClientID orClientSecret is invalid").Error())
+	}
 
 	err := godotenv.Load(".env")
 	if err != nil {
@@ -188,7 +198,7 @@ func (svc *Service) MakeGetAllMembersGatewayHandler(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, "error: "+err.Error())
 	}
 
-	req, err := http.NewRequest("GET", os.Getenv("GETALLMEMBERS"), nil)
+	req, err := http.NewRequest("GET", fmt.Sprintf(os.Getenv("GETALLMEMBERS"), clientID, clientSecret), nil)
 	if err != nil {
 		level.Error(logger).Log("Error", err, "time", time.Now().Local())
 		return c.JSON(http.StatusInternalServerError, "error: "+err.Error())

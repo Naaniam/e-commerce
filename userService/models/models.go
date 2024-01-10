@@ -1,5 +1,6 @@
 package models
 
+// Member represents the member table
 type Member struct {
 	ID        int       `json:"id" gorm:"primaryKey;column:id"`
 	FirstName string    `json:"first_name" gorm:"column:first_name" validate:"required"`
@@ -10,6 +11,7 @@ type Member struct {
 	Addresses []Address `json:"address" gorm:"foreignKey:MemberID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
 }
 
+// Address represents the addresses table
 type Address struct {
 	ID           int    `json:"id" gorm:"primaryKey;column:id"`
 	MemberID     string `json:"member_id" gorm:"column:member_id"`
@@ -21,6 +23,7 @@ type Address struct {
 	Country      string `json:"country" gorm:"column:country" validate:"required"`
 }
 
+// Admin represents the admins table
 type Admin struct {
 	ID       int    `json:"id" gorm:"primaryKey;column:id"`
 	Name     string `json:"name" gorm:"column:name" validate:"required"`

@@ -7,8 +7,6 @@ import (
 
 	"github.com/e-commerce/order/models"
 	"github.com/e-commerce/order/utilities"
-	productModels "github.com/e-commerce/product/models"
-	memberModels "github.com/e-commerce/user/models"
 	"github.com/go-kit/log"
 	"github.com/go-kit/log/level"
 	"gorm.io/gorm"
@@ -34,9 +32,9 @@ func NewDbConnection(db *gorm.DB, logger log.Logger) Repository {
 // CreateOrder method
 func (db *DbConnection) CreateOrder(ctx context.Context, placeOrder *models.PlaceOrder) (*models.OrderResponse, error) {
 	logger := log.With(db.Logger, "repo", "gorm", "method", "CreateOrder", "time", time.Now().Local())
-	var member memberModels.Member
-	var brand productModels.Brand
-	var ram productModels.RAMSize
+	var member models.Member
+	var brand models.Brand
+	var ram models.RAMSize
 	var orderResponse models.OrderResponse
 
 	err := utilities.ValidateStruct(placeOrder)

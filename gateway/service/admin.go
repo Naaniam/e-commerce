@@ -53,7 +53,7 @@ func (svc *Service) MakeAdminSignUpGatewayHandler(c echo.Context) error {
 	responseBody, err := io.ReadAll(resp.Body)
 	if err != nil {
 		level.Error(logger).Log("Error", err, "time", time.Now().Local())
-		return c.JSON(http.StatusInternalServerError, "error: "+err.Error())
+		return c.JSON(http.StatusInternalServerError, "error: "+"Admin Exists")
 	}
 
 	var response map[string]interface{}

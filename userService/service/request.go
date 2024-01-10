@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 )
 
@@ -37,6 +38,7 @@ func AdminLoginDecodeRequest(ctx context.Context, r *http.Request) (interface{},
 	}
 
 	return request, nil
+
 }
 
 // MemberLoginDecodeRequest
@@ -50,8 +52,20 @@ func MemberLoginDecodeRequest(ctx context.Context, r *http.Request) (interface{}
 	return request, nil
 }
 
+var (
+	validClient = map[string]string{
+		"admin": "secret",
+	}
+)
+
 // GetAllMembersDecodeRequest
 func GetAllMembersDecodeRequest(ctx context.Context, r *http.Request) (interface{}, error) {
+	clientID := r.FormValue("client_id")
+	clientSecret := r.FormValue("client_secret")
+
+	if !isValidClient(clientID, clientSecret) && clientID != "admin" {
+		return nil, fmt.Errorf("UnAuthorized")
+	}
 	return nil, nil
 }
 
@@ -59,7 +73,20 @@ func GetAllMembersDecodeRequest(ctx context.Context, r *http.Request) (interface
 func GetMemberByIDDecodeRequest(ctx context.Context, r *http.Request) (interface{}, error) {
 	var request GetMemberByIDRequest
 
+	clientID := r.FormValue("client_id")
+	clientSecret := r.FormValue("client_secret")
 	request.EmailID = r.FormValue("email")
 
+	if !isValidClient(clientID, clientSecret) && clientID != "admin" {
+		return nil, fmt.Errorf("UnAuthorized")
+	}
+
 	return request, nil
+}
+
+func isValidClient(clientID, clientSecret string) bool {
+	if secret, exists := validClient[clientID]; exists && secret == clientSecret {
+		return true
+	}
+	return false
 }

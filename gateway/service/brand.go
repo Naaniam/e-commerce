@@ -20,11 +20,17 @@ func (svc *Service) MakeAddBrandGatewayHandler(c echo.Context) error {
 	var request AddBrandRequest
 
 	logger := log.With(svc.Logger, "method", "MakeAddBrandGatewayHandler", "time", time.Now().Local())
+	clientID := c.FormValue("client_id")
+	clientSecret := c.FormValue("client_secret")
+
+	if clientID == "" || clientSecret == "" {
+		return c.JSON(http.StatusBadRequest, fmt.Errorf("ClientID orClientSecret is invalid").Error())
+	}
 
 	err := godotenv.Load(".env")
 	if err != nil {
 		level.Error(logger).Log("Error", err, "time", time.Now().Local())
-		fmt.Println("Error Loading.env", err)
+		return c.JSON(http.StatusBadRequest, err.Error())
 	}
 
 	if err := c.Bind(&request); err != nil {
@@ -32,17 +38,13 @@ func (svc *Service) MakeAddBrandGatewayHandler(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, err.Error())
 	}
 
-	fmt.Println("request", request)
-
 	requests, err := json.Marshal(&request)
 	if err != nil {
 		level.Error(logger).Log("Error", err, "time", time.Now().Local())
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
 
-	fmt.Println("requests", string(requests))
-
-	req, err := http.NewRequest("POST", os.Getenv("ADDPRODUCT"), bytes.NewBuffer(requests))
+	req, err := http.NewRequest("POST", fmt.Sprintf(os.Getenv("ADDPRODUCT"), clientID, clientSecret), bytes.NewBuffer(requests))
 	if err != nil {
 		level.Error(logger).Log("Error", err, "time", time.Now().Local())
 		return c.JSON(http.StatusInternalServerError, err.Error())
@@ -89,8 +91,6 @@ func (svc *Service) MakeGetAllBrandsGatewayHandler(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, "error: "+err.Error())
 	}
 
-	fmt.Println("req", req)
-
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
@@ -104,8 +104,6 @@ func (svc *Service) MakeGetAllBrandsGatewayHandler(c echo.Context) error {
 		level.Error(logger).Log("Error", err, "time", time.Now().Local())
 		return c.JSON(http.StatusInternalServerError, "error: "+err.Error())
 	}
-
-	fmt.Println("responsebody", string(responseBody))
 
 	var response map[string]interface{}
 
@@ -124,12 +122,10 @@ func (svc *Service) MakeGetBrandByNameHandler(c echo.Context) error {
 
 	logger := log.With(svc.Logger, "method", "MakeGetBrandByNameHandler", "time", time.Now().Local())
 
-	fmt.Println("Request", request)
-
 	err := godotenv.Load(".env")
 	if err != nil {
 		level.Error(logger).Log("Error", err, "time", time.Now().Local())
-		fmt.Println("Error Loading.env", "error: "+err.Error())
+		return c.JSON(http.StatusBadRequest, err.Error())
 	}
 
 	req, err := http.NewRequest("GET", fmt.Sprintf(os.Getenv("GETPRODUCTBYNAME"), request), nil)
@@ -137,8 +133,6 @@ func (svc *Service) MakeGetBrandByNameHandler(c echo.Context) error {
 		level.Error(logger).Log("Error", err, "time", time.Now().Local())
 		return c.JSON(http.StatusInternalServerError, "error: "+err.Error())
 	}
-
-	fmt.Println("Request:", req)
 
 	client := &http.Client{}
 	resp, err := client.Do(req)
@@ -167,6 +161,12 @@ func (svc *Service) MakeGetBrandByNameHandler(c echo.Context) error {
 // DeleteProdudctByID Handler
 func (svc *Service) MakeDeleteBrandByIDGatewayHandler(c echo.Context) error {
 	request := c.FormValue("id")
+	clientID := c.FormValue("client_id")
+	clientSecret := c.FormValue("client_secret")
+
+	if clientID == "" || clientSecret == "" {
+		return c.JSON(http.StatusBadRequest, fmt.Errorf("ClientID orClientSecret is invalid").Error())
+	}
 
 	logger := log.With(svc.Logger, "method", "MakeDeleteBrandByIDGatewayHandler", "time", time.Now().Local())
 
@@ -176,9 +176,7 @@ func (svc *Service) MakeDeleteBrandByIDGatewayHandler(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, "error: "+err.Error())
 	}
 
-	fmt.Println("Values", fmt.Sprintf(os.Getenv("DELETEPRODUCTBYID"), request))
-
-	req, err := http.NewRequest("DELETE", fmt.Sprintf(os.Getenv("DELETEPRODUCTBYID"), request), nil)
+	req, err := http.NewRequest("DELETE", fmt.Sprintf(os.Getenv("DELETEPRODUCTBYID"), clientID, clientSecret, request), nil)
 	if err != nil {
 		level.Error(logger).Log("Error", err, "time", time.Now().Local())
 		return c.JSON(http.StatusInternalServerError, "error: "+err.Error())
@@ -212,12 +210,16 @@ func (svc *Service) MakeDeleteBrandByIDGatewayHandler(c echo.Context) error {
 // UpdateBrandByID Handler
 func (svc *Service) MakeUpdateBrandByNameHandler(c echo.Context) error {
 	var request UpdateBrandByIDRequest
+	clientID := c.FormValue("client_id")
+	clientSecret := c.FormValue("client_secret")
+
+	if clientID == "" || clientSecret == "" {
+		return c.JSON(http.StatusBadRequest, fmt.Errorf("ClientID orClientSecret is invalid").Error())
+	}
 
 	logger := log.With(svc.Logger, "method", "MakeUpdateBrandByNameHandler", "time", time.Now().Local())
 
 	request.Name = c.FormValue("brand_name")
-
-	fmt.Println("requestID", request.Name)
 
 	if err := c.Bind(&request.Data); err != nil {
 		level.Error(logger).Log("Error", err, "time", time.Now().Local())
@@ -236,7 +238,7 @@ func (svc *Service) MakeUpdateBrandByNameHandler(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, "error: "+err.Error())
 	}
 
-	req, err := http.NewRequest("PUT", fmt.Sprintf(os.Getenv("UPDATEPRODUCTBYNAME"), request.Name), bytes.NewBuffer(requests))
+	req, err := http.NewRequest("PUT", fmt.Sprintf(os.Getenv("UPDATEPRODUCTBYNAME"), clientID, clientSecret, request.Name), bytes.NewBuffer(requests))
 	if err != nil {
 		level.Error(logger).Log("Error", err, "time", time.Now().Local())
 		return c.JSON(http.StatusInternalServerError, "error: "+err.Error())

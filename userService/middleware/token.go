@@ -8,7 +8,6 @@ import (
 )
 
 const (
-	JWTSecret  = "d7830ad5791dsdsds"
 	JwtExpHour = 1
 	JwtExpMin  = 0
 	JwtExpSec  = 30

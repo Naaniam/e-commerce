@@ -23,8 +23,7 @@ func SendMailHandler(c echo.Context) error {
 	// Retrieve user email from the session
 	session, err := store.Get(c.Request(), "member-session")
 	if err != nil {
-		fmt.Println(err)
-		return c.JSON(http.StatusInternalServerError, "Error Occured: "+err.Error())
+	return c.JSON(http.StatusInternalServerError, "Error Occured: "+err.Error())
 	}
 
 	userEmail, ok := session.Values["email"].(string)
@@ -34,7 +33,6 @@ func SendMailHandler(c echo.Context) error {
 
 	session, err = store.Get(c.Request(), "response-session")
 	if err != nil {
-		fmt.Println(err)
 		return c.JSON(http.StatusInternalServerError, "Error Occured: "+err.Error())
 	}
 	response, ok := session.Values["response"]
@@ -57,7 +55,6 @@ func SendConfirmationEmail(toEmail string, response interface{}) error {
 	}
 
 	auth := smtp.PlainAuth("", emailConfig.Username, emailConfig.Password, emailConfig.Host)
-	fmt.Println("auth", auth)
 
 	// Email template
 	subject := "Confirmation Email"
