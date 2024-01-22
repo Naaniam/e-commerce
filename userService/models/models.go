@@ -30,3 +30,4 @@ type Admin struct {
 	Email    string `json:"email" gorm:"unique;column:email" validate:"required"`
 	Password string `json:"password" gorm:"column:password" validate:"required"`
 }
+

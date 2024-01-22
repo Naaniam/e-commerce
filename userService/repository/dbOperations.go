@@ -75,8 +75,6 @@ func (db *DbConnection) CreateMember(ctx context.Context, member *models.Member)
 func (db *DbConnection) AdminLoginByMailID(ctx context.Context, admin *models.Admin, email string) error {
 	logger := log.With(db.Logger, "repo", "gorm", "method", "AdminLoginByMailID", "time", time.Now().Local())
 
-	fmt.Println("Admin before in repo:", admin, " email: ", email)
-
 	if err := db.DB.Debug().Find(&admin, "email=?", email).Error; err != nil {
 		level.Error(logger).Log("Error", err, "time", time.Now().Local())
 		return err

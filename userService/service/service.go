@@ -73,6 +73,7 @@ func (svc *service) AdminSignUpService(ctx context.Context, admin *models.Admin)
 		level.Error(logger).Log("Error", err)
 		return err
 	}
+
 	logger.Log("Message", "Successfully Admin signed up", "time", time.Now().Local())
 	return nil
 }
